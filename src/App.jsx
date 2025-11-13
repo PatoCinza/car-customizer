@@ -12,16 +12,17 @@ function App() {
   // Store uploaded logo data
   const [uploadedLogo, setUploadedLogo] = useState(null)
 
-  // Store the current car model URL
-  const [carModelUrl, setCarModelUrl] = useState(
-    'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/models/gltf/DamagedHelmet/glTF/DamagedHelmet.gltf'
-  )
+  // Fixed car model URL - uses local generic sedan car model
+  const carModelUrl = new URL('./assets/generic_sedan_car_gltf/scene.gltf', import.meta.url).href
 
   // Store placed zones with their logos
   const [placedZones, setPlacedZones] = useState({})
 
   // Store the final texture that has been baked
   const [bakedTexture, setBakedTexture] = useState(null)
+
+  // Store the UV map extracted from the model
+  const [uvMapImage, setUVMapImage] = useState(null)
 
   const handleLogoUpload = (file) => {
     const reader = new FileReader()
@@ -32,11 +33,6 @@ function App() {
       })
     }
     reader.readAsDataURL(file)
-  }
-
-  const handleModelUpload = (file) => {
-    const url = URL.createObjectURL(file)
-    setCarModelUrl(url)
   }
 
   const handleZoneUpdate = (zoneId, logoData) => {
@@ -50,20 +46,14 @@ function App() {
     setBakedTexture(textureCanvas)
   }
 
+  const handleUVMapExtracted = (uvMapCanvas) => {
+    setUVMapImage(uvMapCanvas)
+  }
+
   return (
     <div className="app">
       <header className="app-header">
-        <h1>3D Car Customizer PoC</h1>
-        <div className="header-controls">
-          <div className="control-group">
-            <label>Upload Car Model (GLB/glTF):</label>
-            <input
-              type="file"
-              accept=".glb,.gltf,.zip"
-              onChange={(e) => e.target.files && handleModelUpload(e.target.files[0])}
-            />
-          </div>
-        </div>
+        <h1>Oi Gabe</h1>
       </header>
 
       <div className="container">
@@ -71,6 +61,7 @@ function App() {
           <CarViewer3D
             modelUrl={carModelUrl}
             bakedTexture={bakedTexture}
+            onUVMapExtracted={handleUVMapExtracted}
           />
         </div>
 
@@ -81,6 +72,7 @@ function App() {
             placedZones={placedZones}
             onZoneUpdate={handleZoneUpdate}
             onBakeTexture={handleBakeTexture}
+            uvMapImage={uvMapImage}
           />
         </div>
       </div>

@@ -5,85 +5,113 @@ import './UVMapEditor.css'
 /**
  * Predefined zones on the UV map where logos can be placed
  * Format: { id, name, x, y, width, height } (in normalized coordinates 0-1)
- * These represent areas on the UV map texture
+ * These represent areas on the UV map texture for the generic sedan car
  */
 const PREDEFINED_ZONES = [
   {
-    id: 'zone-front',
-    name: 'Front',
-    x: 0.25,
-    y: 0.1,
-    width: 0.5,
-    height: 0.3,
+    id: 'zone-hood',
+    name: 'Hood',
+    x: 0.3,
+    y: 0.2,
+    width: 0.4,
+    height: 0.2,
     color: '#ff6b6b'
   },
   {
-    id: 'zone-side',
-    name: 'Side',
-    x: 0.05,
+    id: 'zone-door-left',
+    name: 'Door (Left)',
+    x: 0.1,
     y: 0.45,
-    width: 0.35,
-    height: 0.4,
+    width: 0.25,
+    height: 0.3,
     color: '#4ecdc4'
   },
   {
-    id: 'zone-back',
-    name: 'Back',
-    x: 0.25,
-    y: 0.6,
-    width: 0.5,
+    id: 'zone-door-right',
+    name: 'Door (Right)',
+    x: 0.65,
+    y: 0.45,
+    width: 0.25,
     height: 0.3,
     color: '#45b7d1'
+  },
+  {
+    id: 'zone-roof',
+    name: 'Roof',
+    x: 0.3,
+    y: 0.0,
+    width: 0.4,
+    height: 0.15,
+    color: '#ffeb3b'
   }
 ]
 
 /**
  * UVMapEditor Component
  * Manages the UV map canvas with Fabric.js for logo placement
- * Displays predefined zones and allows logos to snap to them
+ * Displays UV map from the 3D model and allows logos to snap to zones
  */
 function UVMapEditor({
   uploadedLogo,
   onLogoUpload,
   placedZones,
   onZoneUpdate,
-  onBakeTexture
+  onBakeTexture,
+  uvMapImage
 }) {
   const canvasRef = useRef(null)
   const fabricCanvasRef = useRef(null)
   const [selectedZone, setSelectedZone] = useState(null)
   const [textureCanvas, setTextureCanvas] = useState(null)
+  const [canvasSize, setCanvasSize] = useState(400)
 
-  // Initialize Fabric.js canvas
+  // Initialize Fabric.js canvas with UV map
   useEffect(() => {
     if (!canvasRef.current) return
 
+    // Fixed canvas size for consistent layout
+    const size = 600
+    setCanvasSize(size)
+
     const canvas = new Canvas(canvasRef.current, {
-      width: 400,
-      height: 400,
-      backgroundColor: '#1a1a1a'
+      width: size,
+      height: size,
+      backgroundColor: 'transparent'
     })
 
     fabricCanvasRef.current = canvas
 
-    // Draw predefined zones
-    drawZones(canvas)
+    // Draw zones on the transparent canvas
+    // UV map background is handled by CSS/container
+    drawZones(canvas, size)
 
     return () => {
       canvas.dispose()
     }
-  }, [])
+  }, [uvMapImage])
+
+  // Update the canvas container background with UV map
+  useEffect(() => {
+    const container = canvasRef.current?.parentElement
+    if (container && uvMapImage) {
+      const bgUrl = uvMapImage.toDataURL('image/png')
+      container.style.backgroundImage = `url(${bgUrl})`
+      container.style.backgroundSize = 'cover'
+      container.style.backgroundPosition = 'center'
+    }
+  }, [uvMapImage])
 
   /**
    * Draw the predefined zones on the canvas
+   * Zones are drawn based on canvas size for proper scaling
    */
-  const drawZones = (canvas) => {
+  const drawZones = (canvas, size = 400) => {
     PREDEFINED_ZONES.forEach((zone) => {
       const rect = new Rect({
-        left: zone.x * canvas.width,
-        top: zone.y * canvas.height,
-        width: zone.width * canvas.width,
-        height: zone.height * canvas.height,
+        left: zone.x * size,
+        top: zone.y * size,
+        width: zone.width * size,
+        height: zone.height * size,
         fill: 'transparent',
         stroke: zone.color,
         strokeWidth: 2,
@@ -93,10 +121,10 @@ function UVMapEditor({
       })
 
       const text = new Text(zone.name, {
-        left: zone.x * canvas.width + 5,
-        top: zone.y * canvas.height + 5,
+        left: zone.x * size + 5,
+        top: zone.y * size + 5,
         fill: zone.color,
-        fontSize: 14,
+        fontSize: 12,
         selectable: false,
         evented: false
       })
@@ -132,10 +160,10 @@ function UVMapEditor({
     const imgElement = new window.Image()
     imgElement.onload = () => {
       const fabricImg = new Image(imgElement, {
-        left: zone.x * canvas.width,
-        top: zone.y * canvas.height,
-        width: zone.width * canvas.width,
-        height: zone.height * canvas.height,
+        left: zone.x * canvasSize,
+        top: zone.y * canvasSize,
+        width: zone.width * canvasSize,
+        height: zone.height * canvasSize,
         scaleX: 1,
         scaleY: 1,
         selectable: true,
@@ -165,38 +193,43 @@ function UVMapEditor({
   const handleBakeTexture = () => {
     if (!fabricCanvasRef.current) return
 
+    console.log('Starting texture bake...')
+
     // Get the current canvas state as an image
     const dataUrl = fabricCanvasRef.current.toDataURL()
+    console.log('Canvas exported, creating texture canvas...')
 
     // Create a new canvas to use as the texture
     const textureCanvas = document.createElement('canvas')
-    textureCanvas.width = 512
-    textureCanvas.height = 512
+    textureCanvas.width = 1024
+    textureCanvas.height = 1024
 
     const ctx = textureCanvas.getContext('2d')
-    ctx.fillStyle = '#1a1a1a'
-    ctx.fillRect(0, 0, 512, 512)
 
-    // Load and draw the baked content
-    const img = new Image()
+    // Start with the UV map background if available
+    if (uvMapImage) {
+      ctx.drawImage(uvMapImage, 0, 0, 1024, 1024)
+    } else {
+      // Otherwise fill with dark background
+      ctx.fillStyle = '#333333'
+      ctx.fillRect(0, 0, 1024, 1024)
+    }
+
+    // Load and draw the logos on top
+    const img = new window.Image()
     img.onload = () => {
-      // Scale to fit the texture canvas
-      const scale = Math.min(512 / img.width, 512 / img.height)
-      const x = (512 - img.width * scale) / 2
-      const y = (512 - img.height * scale) / 2
+      console.log('Logos loaded, drawing onto texture...')
 
-      ctx.drawImage(
-        img,
-        x,
-        y,
-        img.width * scale,
-        img.height * scale
-      )
+      // Draw the logos (which are on a transparent canvas) on top
+      ctx.drawImage(img, 0, 0, 1024, 1024)
 
+      console.log('Texture baked successfully')
       setTextureCanvas(textureCanvas)
       onBakeTexture(textureCanvas)
+    }
 
-      alert('Texture baked! The 3D model should now show the updated texture.')
+    img.onerror = () => {
+      console.error('Error loading canvas for baking')
     }
 
     img.src = dataUrl

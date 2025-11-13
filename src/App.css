@@ -38,31 +38,17 @@ body {
 }
 
 .app-header h1 {
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
   font-size: 1.8rem;
 }
 
-.header-controls {
-  display: flex;
-  gap: 2rem;
-  flex-wrap: wrap;
+.app-header .subtitle {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #aaa;
+  font-style: italic;
 }
 
-.control-group {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.control-group label {
-  font-size: 0.95rem;
-  white-space: nowrap;
-}
-
-.control-group input[type="file"] {
-  padding: 0.4rem;
-  cursor: pointer;
-}
 
 .container {
   display: flex;
