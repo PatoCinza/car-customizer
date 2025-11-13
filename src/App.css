@@ -1,42 +1,140 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #1a1a1a;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #1a1a1a;
+}
+
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  width: 100vw;
+  height: 100vh;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.app {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
+.app-header {
+  background-color: #242424;
+  padding: 1rem;
+  border-bottom: 1px solid #444;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.app-header h1 {
+  margin-bottom: 1rem;
+  font-size: 1.8rem;
+}
+
+.header-controls {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.control-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.control-group label {
+  font-size: 0.95rem;
+  white-space: nowrap;
+}
+
+.control-group input[type="file"] {
+  padding: 0.4rem;
+  cursor: pointer;
+}
+
+.container {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  gap: 0;
+}
+
+.viewer-section {
+  flex: 1;
+  background-color: #1a1a1a;
+  border-right: 1px solid #444;
+  overflow: hidden;
+}
+
+.editor-section {
+  flex: 1;
+  background-color: #2a2a2a;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Common button styles */
+button {
+  border: 1px solid #444;
+  padding: 0.6rem 1.2rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  background-color: #333;
+  color: #fff;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+button:hover {
+  background-color: #444;
+  border-color: #666;
+}
+
+button:active {
+  background-color: #555;
+}
+
+button.primary {
+  background-color: #0d47a1;
+  border-color: #0d47a1;
+}
+
+button.primary:hover {
+  background-color: #1565c0;
+  border-color: #1565c0;
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 1024px) {
+  .container {
+    flex-direction: column;
   }
-  to {
-    transform: rotate(360deg);
+
+  .viewer-section {
+    border-right: none;
+    border-bottom: 1px solid #444;
+    min-height: 50vh;
   }
-}
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
+  .editor-section {
+    min-height: 50vh;
   }
-}
 
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
+  .header-controls {
+    gap: 1rem;
+  }
 }
